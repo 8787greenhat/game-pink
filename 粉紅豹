@@ -1,0 +1,203 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class player_move : MonoBehaviour
+{
+    public float xspeed;
+    public float yspeed;
+    public float flashtime;
+
+    public int hp;
+    public float jumph;
+    public float groungdis;
+    public float reload;
+    
+    public bool isclimb;
+    public bool isladder;
+    public bool isground; 
+    
+    public Rigidbody2D body;
+    public CapsuleCollider2D pink;
+    public BoxCollider2D foot;
+    public GameObject bullet;
+
+    RaycastHit2D rayground;
+    
+    public Animator myanimator;
+    public SpriteRenderer mysprite;
+
+    public int blood;
+    public int bullet_limet;
+    public float reloadtime;
+
+    public float vector;
+    public Vector3 respawnpoint;
+
+    public AudioSource myaudioSource;
+    public AudioClip shoot;
+    public AudioClip jump;
+    public AudioClip damge;
+    public AudioClip win;
+    public AudioClip lose;
+
+    public static string winorlose = "";
+    void Start()
+    {
+        
+    } 
+    void Update()
+    {       
+        datacheck();
+        movex();
+        reloadbullet();
+        getkey();
+        checkcoll();
+        climb();
+        bulletinstantiate();
+    }
+    void datacheck()
+    {     
+        if(transform.position.y < -7 || hp <=0)
+        {
+          Time.timeScale = 0;
+          myaudioSource.PlayOneShot(lose);
+          winorlose = "LOSE";
+          Invoke("stagechange",0.7f);
+        }      
+    }
+    void reloadbullet()
+    {
+        if(reloadtime < 0)
+        {           
+            reloadtime = reload;
+            if(bullet_limet < 6)
+            {
+                bullet_limet += 1;
+            }
+        }
+        reloadtime -= Time.deltaTime;
+    }
+    void checkcoll()
+    {     
+        rayground =  Physics2D.Raycast(transform.position,Vector2.down,
+        Mathf.Infinity,LayerMask.GetMask("ground"));              
+        groungdis = transform.position.y - rayground.transform.position.y;
+        if(groungdis > 0.3)
+        {
+            isground = false;
+        }
+        else if (foot.IsTouchingLayers(LayerMask.GetMask("ladder")))
+        {
+            isclimb = true;
+            isground = false;
+        }
+        else
+        {
+            isground = true;
+        }
+        Physics2D.IgnoreLayerCollision(6, 7, !isground);
+        isladder = body.IsTouchingLayers(LayerMask.GetMask("ladder"));
+    }
+    void movex()
+    {       
+        float x = Input.GetAxisRaw("Horizontal");
+        body.velocity = new Vector2(x * xspeed, body.velocity.y);
+        bool movexaxis = Mathf.Abs(x) > 0;
+        myanimator.SetBool("run", movexaxis);
+        if (x > 0 && hp>0)
+        {
+            mysprite.flipX = false;
+            vector = 1;
+        }
+        else if (x < 0 && hp>0)
+        {
+            mysprite.flipX = true;
+            vector = -1; 
+        }
+    }
+    void getkey()
+    {
+        if (Input.GetKeyDown(KeyCode.Space) && isground == true)
+        {
+            myaudioSource.PlayOneShot(jump);
+            body.velocity = new Vector2(body.velocity.x, jumph);  
+            isground = false;
+        }   
+    }
+    void bulletinstantiate()
+    {
+        if (Input.GetKeyDown(KeyCode.Z) && bullet_limet >0)
+        {
+            myaudioSource.PlayOneShot(shoot);
+            Instantiate(bullet,new Vector2(transform.position.x,
+            transform.position.y + 0.3f), Quaternion.identity);
+            bullet_limet -= 1;
+        }
+    }
+    void climb()
+    {
+        float y = Input.GetAxisRaw("Vertical");
+        if (isladder == true)
+        {
+            if(y != 0)
+            {
+                body.gravityScale = 0;
+                body.velocity = new Vector2(body.velocity.x, y * yspeed);
+                isclimb = true;
+            }
+            else
+            {
+                body.gravityScale = 0;
+                body.velocity = new Vector2(body.velocity.x, 0);
+            }
+        }
+        else    
+        {
+            isclimb = false;
+            body.gravityScale = 1;
+        }
+    }
+    void stagechange()
+    {
+        SceneManager.LoadScene("end");
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "enemy")
+        {
+            hp -= 1;
+            myaudioSource.PlayOneShot(damge);
+            Destroy(collision.gameObject);
+            this.gameObject.transform.position = respawnpoint;
+        }
+        if (collision.gameObject.tag == "princess")
+        {
+            Time.timeScale = 0;
+            myaudioSource.PlayOneShot(win);
+            winorlose = "WIN";
+            Invoke("stagechange",0.5f);
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "enemy")
+        {
+            hp -= 1;
+            myaudioSource.PlayOneShot(damge);
+            Destroy(collision.gameObject);
+            this.gameObject.transform.position = respawnpoint;
+        }
+        if (collision.gameObject.tag == "blood")
+        {
+            hp += 5;
+            Destroy(collision.gameObject);
+        }
+        if (collision.gameObject.tag == "Respawn")
+        {
+            respawnpoint = collision.transform.position;
+            Destroy(collision.gameObject);
+        }
+    }
+}
