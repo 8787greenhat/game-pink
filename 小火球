@@ -1,0 +1,132 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class fire5 : MonoBehaviour
+{
+    public float Yspeed;
+    public float Xspeed;
+    public int  movevec;
+
+    bool isladder;
+    bool isclimb;
+    bool climbed;
+    bool following;
+
+    Rigidbody2D firerb;
+    CapsuleCollider2D firecap;
+    Animator fireanimator;
+    GameObject fire;
+
+    int ran;
+    float xmove;
+    void Start()
+    {
+        firerb = GetComponent<Rigidbody2D>();
+        firecap = GetComponent<CapsuleCollider2D>();
+        fireanimator = GetComponent<Animator>();
+        fire = GetComponent<GameObject>();
+        xmove = Xspeed;
+    }
+    void Update()
+    {
+        move();
+        climb();
+        checkcoll();
+        follow();
+        if(transform.position.y < -7)
+        {
+            Destroy(this.gameObject);
+        }
+    }
+    void move()
+    {
+        if(isclimb == false)
+        {
+            transform.position += new Vector3(Xspeed*Time.deltaTime*movevec,0,0);
+        }
+    }
+    void climb()
+    {
+        if(isladder == true && following == false)
+        {
+            
+            if(ran>70 && climbed == false)
+            {
+                climbed = true;
+                firerb.gravityScale = 0;
+                isclimb = true;
+                firerb.velocity =new Vector3(0,Yspeed*Time.deltaTime,0);
+            }           
+        }
+        else
+        {
+            ran = Random.Range(0,100);
+            firerb.gravityScale = 1;
+            isclimb = false;
+        }
+    }
+    void checkcoll()
+    {
+        isladder = firecap.IsTouchingLayers(LayerMask.GetMask("ladder"));
+        Ray2D ray= new Ray2D(transform.position,Vector3.up);
+        RaycastHit2D groundrayup = Physics2D.Raycast(ray.origin ,ray.direction
+        ,Mathf.Infinity,LayerMask.GetMask("ground"));
+        GameObject[] ground = GameObject.FindGameObjectsWithTag("ground");
+        for(int i =0 ; i < ground.Length ; i = i+1)
+        {
+            if(ground[i] == groundrayup.transform.gameObject)
+            {
+                Physics2D.IgnoreCollision(ground[i].GetComponent<BoxCollider2D>(),firecap);
+            }
+            else
+            {
+                Physics2D.IgnoreCollision(ground[i].GetComponent<BoxCollider2D>(),firecap,false);
+            }
+        }      
+    }
+    void follow()
+    {
+        Vector3 playerpos = GameObject.FindWithTag("player").transform.position;
+        bool climbcheck = Mathf.Abs(transform.position.y - playerpos.y) < 0.4 && isclimb == false;
+        float X_dis = transform.position.x - playerpos.x;
+        following = climbcheck;
+        fireanimator.SetBool("follow",climbcheck);
+        if(X_dis <0 && climbcheck)
+        {
+            movevec = Mathf.Abs(movevec);
+            Xspeed = 1.5f*xmove;
+        }
+        else if(X_dis >0 && climbcheck)
+        {
+            movevec = -Mathf.Abs(movevec);
+            Xspeed = 1.5f* xmove;
+        }
+        else
+        {
+            Xspeed = xmove;
+        }
+    }
+    void OnTriggerEnter2D(Collider2D other) 
+    {
+        if(other.gameObject.tag == "ground box border")
+        {
+            movevec *= -1;
+            climbed = false;
+        }
+        if(other.gameObject.tag == "bullet")
+        {
+            Destroy(other.gameObject);
+            Destroy(this.gameObject);
+            system.score += 400;     
+        }   
+    }
+    void OnCollisionEnter2D(Collision2D other) 
+    {
+        if(other.gameObject.tag == "oil"||other.gameObject.tag == "princess" || other.gameObject.tag == "boss" )
+        {
+            movevec *= -1;
+            climbed = false;
+        }  
+    }
+}
