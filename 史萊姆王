@@ -1,0 +1,35 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class boss_stage1 : MonoBehaviour
+{
+    public float reloadtime;
+    public GameObject fallbarrel;
+    public GameObject normalbarrel;
+    public Transform playerpos;
+    float reload;
+    void Start()
+    {
+        reload = 1;
+    }
+    void Update()
+    {
+        playerpos = GameObject.Find("mainplayer").transform;
+        float ran = Random.Range(1,100);
+        if(reload < 0)
+        {
+            if(ran > 40)
+            {
+                Instantiate(normalbarrel, transform.position, Quaternion.identity);
+                reload = reloadtime;
+            }
+            else if(ran < 30)
+            {
+                Instantiate(fallbarrel,new Vector2(playerpos.transform.position.x,transform.position.y + 1f), Quaternion.identity);
+                reload = reloadtime;
+            }
+        }
+        reload -= Time.deltaTime;
+    }
+}
