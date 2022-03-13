@@ -1,0 +1,57 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
+public class system : MonoBehaviour
+{
+    float hp;
+    int high_score;
+    bool pause = false;
+    public static float time;
+    public static int score;
+    
+    public Text scoretext;
+    public Text hpint;
+    public Text pausetext;
+    public Text timer;
+    public Text highscoretext;
+    public Text mintimetext;
+    public GameObject player;
+    
+    void Start()
+    {
+        hp = player.GetComponent<player_move>().hp;
+    }
+    void Update()
+    {
+        dataupdate();
+        stop();
+    }
+    void dataupdate()
+    {
+        time += Time.deltaTime;
+        timer.text = ((int)time).ToString();
+        hp = player.GetComponent<player_move>().hp;
+        hpint.text = hp.ToString();
+        scoretext.text = score.ToString();
+    }
+    void stop()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            pause = !pause; 
+        }
+        if(pause == true)
+        {
+            Time.timeScale = 0;
+            pausetext.enabled = true;
+        }
+        else
+        {
+            Time.timeScale = 1;
+            pausetext.enabled = false;
+        }
+    }
+}
