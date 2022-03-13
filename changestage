@@ -1,0 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+
+public class changestage : MonoBehaviour
+{
+    // Start is called before the first frame update
+    void Start()
+    {
+        
+    }
+
+    public void gamestart(string text)
+    {
+        SceneManager.LoadScene(text);
+    }
+    public void outgame()
+    {
+        Application.Quit();
+    }
+}
