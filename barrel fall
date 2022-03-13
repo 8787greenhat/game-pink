@@ -1,0 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class barrelfall : MonoBehaviour
+{
+    int speed;
+    public Rigidbody2D rb;
+    void Start()
+    {
+        rb = this.gameObject.GetComponent<Rigidbody2D>();
+        speed = Random.Range(1,6);
+    }
+    void Update()
+    {          
+        transform.position -= new Vector3(0, speed*Time.deltaTime, 0);                   
+        if(transform.position.y < -7)
+        {
+            Destroy(this.gameObject);
+        }
+    }
+}
