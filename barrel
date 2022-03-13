@@ -1,0 +1,56 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class barrel : MonoBehaviour
+{
+    public int vector = 1;
+    public Rigidbody2D rigid;
+    public GameObject fireball;
+    int xspeed;
+    public void Start()
+    {
+        rigid = GetComponent<Rigidbody2D>();
+        xspeed = (Random.Range(2,4));
+    }
+    void Update() 
+    {
+        if(transform.position.y < -7)
+        {
+            Destroy(this.gameObject);
+        }
+        transform.position += new Vector3(vector*xspeed*Time.deltaTime,0,0);
+        rigid.rotation += -300f*vector*Time.deltaTime;    
+    }
+    void Fireball()
+    {
+        float ran = Random.Range(1, 10);
+        if (ran > 6)
+        {
+            Instantiate(fireball, transform.position, Quaternion.identity);
+        }
+        Destroy(this.gameObject);
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "border")
+        {
+            vector = vector * -1;
+        }
+        if(collision.gameObject.tag == "oil")
+        {
+            Fireball();          
+        }
+    }
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if(collision.gameObject.tag == "bullet")
+        {
+            Destroy(collision.gameObject);
+            Destroy(this.gameObject);
+            system.score += 100;
+            float ran = Random.Range(1, 10);
+            Fireball();          
+        }
+    }
+}
