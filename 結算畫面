@@ -1,0 +1,55 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class end_system : MonoBehaviour
+{
+    int fasttime;
+    int highscore;
+    int systemscore;
+    int score;
+    float time;
+    string plus;
+
+    public Text Highscoretext;
+    public Text lastscore;
+    public Text Scoretext;
+    public Text timeText;
+    public Text winlosetext;
+    public Text plustext;
+
+    void Start()
+    {
+        highscore = PlayerPrefs.GetInt("highscore");
+        if(player_move.winorlose == "WIN")
+        {
+            score +=10000;
+            plus = " +10000(WIN)";
+        }
+        else if(player_move.winorlose == "LOSE")
+        {
+            score -= 5000;
+            plus = "-5000(LOSE)";
+        }
+        time =system.time;
+        systemscore = system.score;       
+        score += systemscore - ((int)time)*5;
+        if(score > highscore)
+        {
+            PlayerPrefs.SetInt("highscore",score);
+            PlayerPrefs.Save();
+        }
+
+        Scoretext.text = systemscore.ToString();
+        timeText.text = ((int)time).ToString();
+        lastscore.text = score.ToString();
+        winlosetext.text = player_move.winorlose;
+        plustext.text = plus;
+        Highscoretext.text = highscore.ToString();
+    }
+    void Update()
+    {
+             
+    }
+}
